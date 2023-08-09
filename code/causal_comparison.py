@@ -34,7 +34,7 @@ def main(test_size,result_name):
     criteo = pd.read_csv('criteo-uplift-v2.1.csv')
 
     results = open(result_name, "w")
-    results.write("Package, Dataset, Model, Method, Score\n")
+    results.write("Package,Dataset,Model,Method,Score\n")
 
 
     confounders = criteo.drop(columns=['conversion'])
@@ -83,12 +83,12 @@ def main(test_size,result_name):
     print("Sklift DML")
     for mod in ['XGB','LR']:
         model = dic[mod]
-        for label_l in ['S','T','DDR']:
+        for label_l in ['S','T','X/DDR']:
             print(label_l)
             m_score = sklift_dml(retail_X_train, retail_y_train.values , retail_X_test, retail_y_test.values, label_l, model)
             res = f"SKlift,RetailHero,{mod},{label_l}, {round(m_score, 5)}\n" #, {round(m_auc_score, 5)}, {round(m_qini_score, 5)}
             results.write(res)
-            #results.append(["SKlift",'Lalonde',label_l, m_score, m_auc_score, m_qini_score])
+            
             m_score = sklift_dml(criteo_X_train, criteo_y_train.values, criteo_X_test, criteo_y_test.values, label_l, model)
             res = f"SKlift,Criteo,{mod},{label_l}, {round(m_score, 5)}\n" #, {round(m_auc_score, 5)}, {round(m_qini_score, 5)}
             results.write(res)
@@ -99,11 +99,10 @@ def main(test_size,result_name):
     print("CausalML DML")
     for mod in ['XGB','LR']:
         model = dic[mod]
-        for base_learner,label_l in zip([BaseSClassifier, BaseTClassifier, BaseXClassifier],['S','T','X']):
+        for base_learner,label_l in zip([BaseSClassifier, BaseTClassifier, BaseXClassifier],['S','T','X/DDR']):
             m_score = causalml_dml(retail_X_train, retail_y_train.values , retail_X_test, retail_y_test.values, base_learner,label_l, model)
             res = f"CausalML,RetailHero,{mod},{label_l}, {round(m_score, 5)}\n" # , {round(m_auc_score, 5)}, {round(m_qini_score, 5)}\n"
-            #m_score, m_auc_score, m_qini_score = causalml_dml(lalonde_X_train, lalonde_X_test, lalonde_y_train, lalonde_y_test, base_learner,label_l, model)
-            #results.append(["CausalML",'Lalonde',label_l, m_score, m_auc_score, m_qini_score])
+
             results.write(res)
             m_score  = causalml_dml(criteo_X_train, criteo_y_train.values, criteo_X_test, criteo_y_test.values, base_learner,label_l, model)
             res = f"CausalML,Criteo,{mod},{label_l}, {round(m_score, 5)}\n" #, {round(m_auc_score, 5)}, {round(m_qini_score, 5)}\n"
@@ -116,20 +115,19 @@ def main(test_size,result_name):
     print("EconML DML")
     for mod in ['XGB','LR']:
         model = dic[mod]
-        for label_l in ['S','T','X']:
+        for label_l in ['S','T','X/DDR']:
             print(label_l)
 
             m_score = econml_dml(retail_X_train, retail_y_train.values , retail_X_test, retail_y_test.values, label_l, model)
             res = f"EconML,RetailHero,{mod},{label_l}, {round(m_score, 5)}\n" 
-            #, {round(m_auc_score, 5)}, {round(m_qini_score, 5)}\n"
+
             results.write(res)
-            #m_score, m_auc_score, m_qini_score = causalml_dml(lalonde_X_train, lalonde_X_test, lalonde_y_train, lalonde_y_test, base_learner,label_l, model)
-            #results.append(["CausalML",'Lalonde',label_l, m_score, m_auc_score, m_qini_score])
+
 
             m_score = econml_dml(criteo_X_train, criteo_y_train.values, criteo_X_test, criteo_y_test.values,label_l, model)
-            #results.append(["EconML",'Criteo',label_l, m_score, m_auc_score, m_qini_score])
+
             res = f"EconML,Criteo,{mod},{label_l}, {round(m_score, 5)}\n"
-            #, {round(m_auc_score, 5)}, {round(m_qini_score, 5)}\n"
+
             results.write(res)
     
     results.close()
@@ -137,9 +135,8 @@ def main(test_size,result_name):
 
 
 if __name__ == '__main__':
-    os.chdir("/Users/georgepanagopoulos/Desktop/research/causal_inference/data/")
     
-    main(test_size = 0.5, result_name = "../results/results_new.txt")
+    main(test_size = 0.5, result_name = "../results/results_new.csv")
     
     df = pd.read_csv('../results/results_new.csv')
     df['Score'] = df['Score'] * 100

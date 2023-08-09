@@ -83,11 +83,9 @@ def econml_dml(X,y, X_t,y_t,label_l, model_out=XGBClassifier, model_effect=XGBRe
         uplift = sl.effect(X_t.drop(columns='treatment',axis=1))
     elif label_l == 'T':
         tl = TLearner(models=model_out())
-        # Train T_learner
         tl.fit(y, X['treatment'], X=X.drop(columns='treatment',axis=1))
         uplift = tl.effect(X_t.drop(columns='treatment',axis=1))
     else:        
-    
         xl = XLearner(models=model_out(),
             propensity_model=model_out(),
             cate_models=model_effect())
@@ -97,4 +95,4 @@ def econml_dml(X,y, X_t,y_t,label_l, model_out=XGBClassifier, model_effect=XGBRe
         uplift = xl.effect(X_t.drop(columns='treatment',axis=1))
 
     score = uplift_at_k(y_true=y_t, uplift=uplift, treatment=X_t['treatment'], strategy='by_group', k=0.4)
-    return score#, auc_score, qini_score
+    return score
