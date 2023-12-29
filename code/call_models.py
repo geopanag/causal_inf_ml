@@ -43,12 +43,12 @@ def sklift_dml(X, y, X_t,y_t, label_l, model=XGBClassifier):
 def causalml_dml(X,y, X_t,y_t, base_learner,label_l, model_out=XGBClassifier, model_effect=XGBRegressor):
     if label_l == 'S':
         learner = base_learner(learner=model_out())
-        ate, lb, ub = learner.estimate_ate( X=X.drop('treatment',axis=1),y=y , treatment=X['treatment'],return_ci=True )  
+        learner.fit( X=X.drop('treatment',axis=1),y=y , treatment=X['treatment'],return_ci=True )  
         uplift=learner.predict(X=X_t.drop('treatment',axis=1), treatment=X_t['treatment']).squeeze()
         
     elif label_l == 'T':
         learner = base_learner(learner=model_out())
-        ate, lb, ub = learner.estimate_ate(X=X.drop('treatment',axis=1),y=y , treatment=X['treatment'])  
+        learner.fit(X=X.drop('treatment',axis=1),y=y , treatment=X['treatment'])  
         
         uplift=learner.predict(X=X_t.drop('treatment',axis=1), treatment=X_t['treatment']).squeeze()
     elif label_l == 'X':
@@ -64,7 +64,7 @@ def causalml_dml(X,y, X_t,y_t, base_learner,label_l, model_out=XGBClassifier, mo
         outcome_learner=model_out(),
         effect_learner=model_effect())
             
-        ate, lb, ub = learner.estimate_ate(X=X.drop('treatment',axis=1) ,y=y, treatment=X['treatment'], p=p_train)  
+        learner.fit(X=X.drop('treatment',axis=1) ,y=y, treatment=X['treatment'], p=p_train)  
         uplift=learner.predict(X=X_t.drop('treatment',axis=1) , treatment=X_t['treatment'], p=p_test).squeeze()
         #preds_dict['{} Learner ({})'.format(label_l, label_m)] = np.ravel([ate, lb, ub])
 
